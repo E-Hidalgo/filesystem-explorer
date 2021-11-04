@@ -12,19 +12,20 @@ $fileSize = $_FILES["addfile"]["size"];
 if(!file_exists("../root")) {
 mkdir($pathName, 0777, true);
 chmod($pathName, 0777);
-}
-else if(file_exists("../root")) {
+
+if(file_exists("../root")) {
 
   if(move_uploaded_file($fileTmp, "../root/" . $fileName)) {
     echo "Uploaded file";
   }else {
     echo "File upload failed";
   }
+}
 
-} else {
-  if(move_uploaded_file($fileTmp, "../root/" . $fileName)) {
-    echo "Uploaded file";
-  } else {
-    echo "File upload failed";
-  }
+// } else {
+//   if(move_uploaded_file($fileTmp, "../root/" . $fileName)) {
+//     echo "Uploaded file";
+//   } else {
+//     echo "File upload failed";
+//   }
 }
