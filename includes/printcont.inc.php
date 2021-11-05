@@ -1,7 +1,19 @@
 <?php
- include_once "./includes/fetching.inc.php";
- include_once "./includes/icons.inc.php";
+require_once("dbh.inc.php");
+echo $_GET["daddypath"];
+$pathdaddy = $_GET["daddypath"];
+
+$fetchQuery = $db -> prepare("
+SELECT * FROM `files` WHERE `pathfather`=:pathfather
+");
+
+$fetchQuery -> execute([
+  "pathfather"=>$_GET["daddypath"]
+]);
+
+$folderFetched = $fetchQuery -> rowCount()? $fetchQuery : [] ;
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -18,11 +30,10 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous">
   </script>
-  <title>File System Project </title>
+  <title>Folders</title>
 </head>
 
 <body>
-
   <header class="d-flex justify-content-between align-items-center p-4">
 
     <div>../root/</div>
@@ -34,13 +45,14 @@
 
       <!-- Button trigger modal -->
       <button name="addNew" class="btn btn-dark rounded-circle" type="button" data-bs-toggle="modal"
-        data-bs-target="#exampleModal"><i class="fas fa-plus"></i></button>
+        data-bs-target="#exampleModalfolder"><i class="fas fa-plus"></i></button>
       <!-- Button trigger modal -->
       <button name="addFolder" class="btn btn-dark rounded-circle" type="button" data-bs-toggle="modal"
-        data-bs-target="#exampleModal2"><i class="fas fa-folder-plus"></i></button>
+        data-bs-target="#exampleModalfolder2"><i class="fas fa-folder-plus"></i></button>
 
       <!-- Modal -->
-      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal fade" id="exampleModalfolder" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
@@ -48,7 +60,7 @@
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              <form method="POST" action="./root/addfile.php" enctype="multipart/form-data">
+              <form method="POST" action="./root/addfile.php?daddy=<?=$pathdaddy?>" enctype="multipart/form-data">
                 <input type="file" name="addfile" />
             </div>
             <div class="modal-footer">
@@ -60,7 +72,8 @@
         </div>
       </div>
       <!-- Modal2 -->
-      <div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal fade" id="exampleModalfolder2" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
@@ -68,7 +81,7 @@
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              <form method="POST" action="./root/addfolder.inc.php">
+              <form method="POST" action="./root/addfolder.inc.php?daddy=<?=$pathdaddy?>">
                 <input type="text" name="addfolder" />
             </div>
             <div class="modal-footer">
@@ -82,68 +95,43 @@
 
     </div>
   </header>
-
-
-  <main id="page-content ">
-    <table class="table">
-      <thead>
-        <tr class="table-info">
-          <th>Name</th>
-          <th>Size</th>
-          <th>Modified</th>
-          <th>Creation </th>
-          <th>Extension</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-
-      <?php if(!empty($fileFetched)):?>
-
-      <tbody>
-
-        <?php
-      foreach ($fileFetched as $file): 
-      ?>
-        <tr>
-          <td>
-            <?php if($file["edit"]): ?>
-            <form
-              action="./includes/edittitle.inc.php?path=<?=$file["path"];?>&id=<?=$file["id"];?>&name=<?=$file["name"];?>&extension<?=$file["extension"];?>"
-              method="POST">
-              <input type="text" name="title" value=<?php echo $file["name"]?>>
-              <input type="submit" name="change" value="change">
-            </form>
-            <?php else: ?>
-            <i class="<?=getFileType($file['extension']);?>"></i>
-            <a
-              href="includes/openfile.inc.php?path=<?=$file["path"];?>&extension=<?=$file["extension"];?>"><?php echo $file["name"]?></a>
-            <?php endif; ?>
-          </td>
-          <td><?php echo $file["size"]?></td>
-          <td><?php echo $file["modified"]?></td>
-          <td><?php echo $file["creation"]?></td>
-          <td><?php echo $file["extension"]?></td>
-
-          <td>
-            <button onClick="document.location.href='includes/edit.inc.php?id=<?= $file['id'];?>'"
-              class="btn btn-warning"><i class="far fa-edit"></i></button>
-            <button
-              onClick="document.location.href='includes/delete.inc.php?id=<?= $file['id'];?>&name=<?=$file["name"];?>'"
-              class="btn btn-danger"><i class="fas fa-trash-alt"></i></button>
-          </td>
-        </tr>
-      </tbody>
-
-      <?php endforeach;?>
-      <?php endif;?>
-    </table>
-  </main>
-  <footer id=" sticky-footer" class="footer mt-auto py-3 bg-light fixed-bottom">
-    <div class="container text-center">
-      <small>TOP Team © All Rights Reserved 2021 Your Website</small>
-    </div>
-  </footer>
-
+  <table>
+    <main id="page-content ">
+      <table class="table">
+        <thead>
+          <tr class="table-info">
+            <th>Name</th>
+            <th>Size</th>
+            <th>Modified</th>
+            <th>Creation </th>
+            <th>Extension</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach($folderFetched as $value): ?>
+          <tr>
+            <td><?php echo $value["name"]?></td>
+            <td><?php echo $value["size"]?></td>
+            <td><?php echo $value["modified"]?></td>
+            <td><?php echo $value["creation"]?></td>
+            <td><?php echo $value["extension"]?></td>
+            <td><button onClick="document.location.href='includes/edit.inc.php?id=<?= $file['id'];?>'"
+                class="btn btn-warning"><i class="far fa-edit"></i></button>
+              <button
+                onClick="document.location.href='includes/delete.inc.php?id=<?= $file['id'];?>&name=<?=$file["name"];?>'"
+                class="btn btn-danger"><i class="fas fa-trash-alt"></i></button>
+            </td>
+          </tr>
+        </tbody>
+        <?php endforeach;?>
+      </table>
+    </main>
+    <footer id=" sticky-footer" class="footer mt-auto py-3 bg-light fixed-bottom">
+      <div class="container text-center">
+        <small>TOP Team © All Rights Reserved 2021 Your Website</small>
+      </div>
+    </footer>
 </body>
 
 </html>

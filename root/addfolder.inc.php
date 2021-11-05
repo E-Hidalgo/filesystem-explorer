@@ -1,18 +1,19 @@
 <?php
 
-require_once('dbh.inc.php');
+require_once('../includes/dbh.inc.php');
 
 
 $modified = date("Y-m-d", filemtime($pathName . $fileName));
 $creation = date("Y-m-d", filectime($pathName . $fileName));
 $fileName = $_POST["addfolder"];
-$pathName= "../root/";
+$pathName= dirname(__FILE__);
+
 
 // prepare to upload to db 
 
 $uploadQuery =$db->prepare("
-INSERT INTO `files`(`name`, `size`, `modified`, `creation`, `extension`, `path`) 
-VALUES (:name, :size, :modified, :creation, :extension, :path)
+INSERT INTO `files`(`name`, `size`, `modified`, `creation`, `extension`, `path`, `pathfather`) 
+VALUES (:name, :size, :modified, :creation, :extension, :path, :pathfather)
 ");
 
 
@@ -24,13 +25,14 @@ $uploadQuery->execute([
   "modified"=>$modified,
   "creation"=>$creation,
   "extension"=>"folder",
-  "path"=>$pathName . $fileName
+  "path"=>$pathName."\\".$fileName,
+  "pathfather"=>$pathName
 ]);
 
-if(!file_exists("../root/$fileName")) {
-mkdir($pathName . $fileName, 0777, true);
+if(!file_exists($pathName."/".$fileName)) {
+mkdir($pathName."/".$fileName, 0777, true);
 if (PHP_OS !== "WINNT") {
-  chmod($pathName . $fileName, 0777);
+  chmod($pathName."/".$fileName, 0777);
 }
 }
 

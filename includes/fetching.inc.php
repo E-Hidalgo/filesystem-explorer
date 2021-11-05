@@ -2,10 +2,12 @@
 require_once("./includes/dbh.inc.php");
 
 $fetchQuery = $db -> prepare("
-SELECT * FROM `files`
+SELECT * FROM `files` WHERE `pathfather`=:pathfather
 ");
 
-$fetchQuery -> execute();
+$fetchQuery -> execute([
+  "pathfather"=>"C:"."\\"."xampp\htdocs\Assembler\Month6"."\\"."files_system\php_files_sync"."\\"."filesystem-explorer"."\\"."root"
+]);
 
 $fileFetched = $fetchQuery -> rowCount()? $fetchQuery : [] ;
 ?>

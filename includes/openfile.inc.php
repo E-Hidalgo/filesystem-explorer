@@ -39,7 +39,7 @@ switch ($extension) {
     </video>";
         break;
     case 'folder':
-        echo "I am a folder";
+        header("Location: printcont.inc.php?daddypath=$path");
         break;
     default:
         echo "File type not supported";
