@@ -1,10 +1,14 @@
 <?php
 require_once("./dbh.inc.php");
+includes "rootPathMaker.php";
 echo "<a href='javascript:history.back(1);'>Back</a>'";
-echo "<pre>";
-print_r($_FILES);
 
-$pathName= "../root/";
+//Paris´s code
+$pathName= "../root";
+
+//create function to constant
+$ROOTFOLDERNUMBER=count(explode("/", rootPathMaker()));
+
 $fileName = $_FILES["addfile"]["name"];
 $fileType =$_FILES["addfile"]["type"];
 $fileTmp = $_FILES["addfile"]["tmp_name"];
@@ -31,6 +35,9 @@ $file= $_FILES["addfile"];
  $modified = date("Y-m-d", filemtime($pathName . $fileName));
  $creation = date("Y-m-d", filectime($pathName . $fileName));
  
+
+
+
 // prepare to upload to db 
 
 $uploadQuery =$db->prepare("
@@ -47,6 +54,7 @@ $uploadQuery->execute([
   "modified"=>$modified,
   "creation"=>$creation,
   "extension"=>$extension,
-  "path"=>$pathName . $fileName
+  "path"=>$pathName."/".$fileName,
+  "pathId"=>$folderNumber
 ]);
-header("location: ../index.php");
+//header("location: ../index.php");
